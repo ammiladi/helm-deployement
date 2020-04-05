@@ -6,6 +6,8 @@ metadata:
   labels:
     app: {{ template "name" . }}
 spec:
+  selector:
+    app: {{ template "name" . }}
   ports:
     {{- range $serviceIndex, $service := .Values.service.app }}
     - port: {{ $service.port.servicePort }}
@@ -13,6 +15,4 @@ spec:
       targetPort: {{ $service.port.targetPort }}
       protocol: {{ $service.port.protocol }}
     {{- end -}}
-  selector:
-    app: {{ template "name" . }}
   {{- end -}}
