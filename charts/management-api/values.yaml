@@ -1,0 +1,78 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into templates.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicas: 2
+app: management-api
+
+deployment:
+  enabled: true
+
+configMap:
+  enabled: true
+
+# Deployment Annotations
+deploymentAnnotations: {}
+
+# To be added to the pod(s)
+podAnnotations: {}
+podLabels: {}
+
+## Security context
+securityContext:
+  enabled: false
+  runAsUser: 999
+  fsGroup: 999
+
+strategy:
+  type: Recreate
+
+ingress:
+  enabled: true
+  annotations:
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  tls:
+    - hosts:
+        - rm-service-clientfile.k8s.dev.pacifica.credit-agricole.fr
+  hosts:
+    - name:  rm-service-clientfile.k8s.dev.pacifica.credit-agricole.fr
+      path: "/"
+      servicePort: "http"
+service:
+  enabled: true
+  app:
+    - name: management-api
+      enabled: true
+      port:
+        targetPort: "management-port"
+        servicePort: 80
+        name: "http"
+        protocol: "TCP"
+
+containers:
+  - name: management-api
+    namespace: default
+    service:
+      port:
+        name : "management-port"
+        containerPort: 9091
+    args: []
+    image:
+      registry: repository-manager.pacifica.credit-agricole.fr:8112
+      repository: /pacifica/application/api/management-api
+      tag: latest
+      pullPolicy: IfNotPresent
+    env:
+      - name:  server.port
+        value: "9091"
+      - name:  spring.profiles.active
+        value: "development"
+      - name:  KEYCLOAK_HOST
+        value: "ares-keycloak-develo-headless"
+      - name:  KEYCLOAK_PORT
+        value: "80"
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "300Mi"

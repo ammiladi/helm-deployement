@@ -1,0 +1,7 @@
+global:
+  buildNumber: 1
+  dockerRepository: docker.com
+  imagePullSecrets: [{"name": ""}]
+  deployEnv: dev
+  domainName: www.domaine.com  
+  logLevel: info

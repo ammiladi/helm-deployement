@@ -1,0 +1,86 @@
+{{- if .Values.deployment.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+{{- with .Values.deploymentAnnotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{ .Values.replicas  | default 1 }}
+  strategy:
+  {{ toYaml .Values.strategy | indent 4 }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+      {{- with .Values.podLabels }}
+      {{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+      {{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      {{- if .Values.schedulerName }}
+      schedulerName: "{{ .Values.schedulerName }}"
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: "{{ .Values.priorityClassName }}"
+      {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+      {{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+      {{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      containers:
+        {{- range $containerIndex, $container := .Values.containers }}
+        - name: {{ $container.name }}
+          image: {{ $container.image.registry }}{{ $container.image.repository}}:{{$container.image.tag}}
+          imagePullPolicy: {{ $container.image.pullPolicy }}
+          {{- with $container.args }}
+          args:
+            {{- range . }}
+            - {{ . | quote }}
+              {{- end }}
+          {{- end }}
+          ports:
+            - containerPort: {{ $container.service.port.containerPort }}
+              name: {{ $container.service.port.name }}
+          env:
+{{ toYaml $container.env | indent 12 }}
+          {{- if $container.resources }}
+          resources:
+          {{- with $container.resources.limits }}
+            limits:
+              cpu: {{ .cpu | quote }}
+              memory: {{ .memory | quote }}
+          {{- end -}}
+   {{- end -}}
+{{- end -}}
+{{- end -}}

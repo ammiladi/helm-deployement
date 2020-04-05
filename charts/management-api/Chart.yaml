@@ -1,0 +1,26 @@
+# The chart API version
+apiVersion: v1
+
+# The name of the chart
+name: management-api
+
+# The description of the deployment project
+description: "management-api project deployment to kubernetes cluster"
+
+# The URL of this project's home page
+home: ""
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.0.1
+
+maintainers:
+  - name: "MILADI Med Amine"
+    email: "miladi.medamine@gmail.com"
+
+
+# The version of the app that this contains. This needn't be SemVer.
+appVersion: 0.0.1-SNAPSHOT
+
+# Whether this chart is deprecated
+deprecated: false
